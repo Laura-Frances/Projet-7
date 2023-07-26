@@ -1,22 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth'); // on passe l'argument auth dans nos routes à protéger
 
-const bookCtrl = require ('../controllers/books');
+const auth = require('../middleware/auth')// on passe l'argument auth dans nos routes à protéger
+const multer = require('../middleware/multer-config')
 
-// poster un livre
-router.post('/', auth, bookCtrl.createBook);
-// récupérer tous les livres 
-router.get('/', auth, bookCtrl.getAllBooks);
-// récupérer un seul livre
-router.get('/:id', auth, bookCtrl.getOneBook);
-// récupérer best livres
-router.get('/bestrating', auth, bookCtrl.getBestBooks);
-// modifier un livre
-router.put('/:id', auth, bookCtrl.modifyBook);
-// supprimer un livre
+const bookCtrl = require('../controllers/books');
+
+router.get('/', bookCtrl.getAllBooks);
+router.get('/bestrating', bookCtrl.getBestBooks); 
+router.get('/:id', bookCtrl.getOneBook);
+router.post('/', auth, multer, bookCtrl.createBook);
+router.put('/:id', auth, multer, bookCtrl.modifyBook);
 router.delete('/:id', auth, bookCtrl.deleteBook);
-
-
+router.post('/:id/rating', auth, bookCtrl.rateBook);
 
 module.exports = router;
