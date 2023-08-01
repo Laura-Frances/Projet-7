@@ -5,16 +5,16 @@ exports.createBook = (req, res) => {
     const bookObject = JSON.parse(req.body.book);
     delete bookObject._id;
     delete bookObject._userId;
+    // const rating = bookObject.rating;
     const book = new Book({
         ...bookObject,
         userId: req.auth.userId,
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-        averageRating: 0,
     });
 
     book.save()
         .then(() => { res.status(201).json({ message: 'Livre enregistré !' }) })
-        .catch(error => { res.status(400).json({ error }) })
+        .catch(() => { res.status(400).json({ message: 'Veuillez remplir tous les champs.'}) })
 };
 
 exports.getOneBook = (req, res) => {
@@ -35,7 +35,8 @@ exports.modifyBook = (req, res) => {
             if (book.userId != req.auth.userId) {
                 res.status(401).json({ message: 'Non-autorisé' });
             } else {
-                Book.updateOne({ _id: req.params.id }, { ...bookObject, _id: req.params.id })
+                Book.updateOne({ _id: req.params.id }, 
+                  { ...bookObject, _id: req.params.id })
                     .then(() => res.status(200).json({ message: 'Livre modifié!' }))
                     .catch(error => res.status(401).json({ error }));
             }
@@ -44,46 +45,47 @@ exports.modifyBook = (req, res) => {
             res.status(400).json({ error });
         });
 };
-// A CORRIGER 
+
 exports.rateBook = (req, res) => {
-    // Get the book ID from the URL parameters
-    const bookId = req.params.id;
+
+    const bookId = req.params.id; // on extrait l'id du livre
+    const rating = req.body.rating; // on extrait la note du livre du corps de la requête
   
-    // Get the rating value from the request body
-    const rating = req.body.rating;
-  
-    // Make sure the rating is a valid number
+    // on s'assure que la note est un nombre valide
     if (!rating || isNaN(rating)) {
       return res.status(400).json({ error: 'La note est invalide.' });
     }
-  
-    // Find the book by ID and update its ratings array
-    Book.findByIdAndUpdate(
+    
+    // trouve le book avec l'id et met à jour son tableau ratings 
+    Book.findByIdAndUpdate( 
       bookId,
       {
-        $push: {
+        $push: { // met à jour le tableau ratings
           ratings: {
-            userId: req.auth.userId,
+            userId: req.auth.userId, 
             grade: rating
           }
         }
       },
-      { new: true } // This option returns the updated book after the update is applied
+      { new: true } // retourne le book mis à jour 
     )
-      .then(updatedBook => {
+      .then(updatedBook => { // promesse résolue 
         if (!updatedBook) {
           return res.status(404).json({ error: 'Livre non trouvé.' });
         }
-  
-        // Calculate the new average rating
+
+        // Calcul de la note moyenne
+        console.log('Ratings:', updatedBook.ratings);
         let totalRating = 0;
-        for (let i = 0; i < updatedBook.ratings.length; i++) {
+        for (let i = 0; i < updatedBook.ratings.length; i++) { // calcul de la somme totale des notes dans le ratings
           let currentRating = updatedBook.ratings[i].grade;
           totalRating += currentRating;
         }
-        updatedBook.averageRating = totalRating / updatedBook.ratings.length;
+        console.log('Total Rating:', totalRating);
+        updatedBook.averageRating = totalRating / updatedBook.ratings.length; // calcul de la note moyenne
+        updatedBook.averageRating = parseFloat(updatedBook.averageRating.toFixed(1)); // on arrondi la noye moyenne à 1 décimale
   
-        // Save the book with the updated average rating
+        // sauvegarde du book mis à jour avec la nouvelle note
         return updatedBook.save();
       })
       .then(book => {
@@ -96,7 +98,7 @@ exports.rateBook = (req, res) => {
       });
   };
 
-  exports.getBestBooks = (req, res, next) => {
+exports.getBestBooks = (req, res, next) => {
     Book.find()
       .sort({ averageRating: -1 }) // Trie par ordre décroissant de la propriété `averageRating`
       .limit(3) // Récupère les trois premiers livres après le tri
@@ -109,14 +111,14 @@ exports.rateBook = (req, res) => {
   };
 
 exports.deleteBook = (req, res) => {
-    Book.findOne({ _id: req.params.id })
-        .then(book => {
-            if (book.userId != req.auth.userId) {
+    Book.findOne({ _id: req.params.id }) // on recherche un livre spécifique dans la base de données
+        .then(book => { // on exécute le livre trouvé
+            if (book.userId != req.auth.userId) { // on vérifie l'auth de l'user 
                 res.status(401).json({ message: 'Not authorized' });
             } else {
                 const filename = book.imageUrl.split('/images/')[1];
-                fs.unlink(`images/${filename}`, () => {
-                    Book.deleteOne({ _id: req.params.id })
+                fs.unlink(`images/${filename}`, () => { // on supprime l'image associée au livre
+                    Book.deleteOne({ _id: req.params.id }) // onsupprime le livre de la DB 
                         .then(() => { res.status(200).json({ message: 'Objet supprimé !' }) })
                         .catch(error => res.status(401).json({ error }));
                 });

@@ -1,18 +1,19 @@
-const express = require('express');
-const mongoose = require('mongoose');
+const express = require('express'); // importation du module express pour notre app
+const mongoose = require('mongoose'); // importation du module mongoose pour l'interaction avec mongoDB
 
 const bookRoutes = require('./routes/bookRoutes');
 const userRoutes = require('./routes/user');
 const path = require('path');
 const cors = require('cors');
-require('dotenv').config();
 
-// Connect to MongoDB
-mongoose.connect('mongodb+srv://laurafrances:vieuxgrimoire1@cluster0.54fecbj.mongodb.net/?retryWrites=true&w=majority', 
-{ useNewUrlParser: true,
-  useUnifiedTopology: true, })
-  .then(() => { console.log('Connecté à MongoDB');})
-  .catch((error) => { console.error('Erreur de connexion à MongoDB', error);});
+// Connect to mongoDB
+const dotenv = require("dotenv")
+dotenv.config()
+
+const connectionString = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.54fecbj.mongodb.net/?retryWrites=true&w=majority`
+mongoose.connect(connectionString)
+  .then(() => { console.log('Connecté à MongoDB'); })
+  .catch((error) => { console.error('Erreur de connexion à MongoDB', error); });
 
   const app = express();
   app.use(cors());
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
 
 // on importe nos Routes
 app.use('/api/books', bookRoutes);
