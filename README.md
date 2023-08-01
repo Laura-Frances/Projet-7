@@ -18,9 +18,9 @@ Pour lancer le back-end dans votre terminal de commandes :
 
 En cas de problème avec le lancement de la partie front-end :
 
-    avec le terminal : git clone + https://github.com/OpenClassrooms-Student-Center/Web-Developer-P6
+    avec le terminal : git clone + https://github.com/OpenClassrooms-Student-Center/P7-Dev-Web-livres
 
-    ou cliquez sur "download ZIP" dispo sur le lien ci-dessus et ajoutez le dossier au projet
+    ou via le lien, cliquez sur "download ZIP" et ajoutez le dossier au projet
 
     une fois le dossier ajouté au projet :
 
