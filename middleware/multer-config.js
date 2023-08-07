@@ -1,12 +1,15 @@
+// on gère ici les fichiers téléchargés (images) dans nos requêtes HTTP
+
 const multer = require('multer');
-const MIME_TYPES = {
+const MIME_TYPES = { // Filtrage des formats pris en charge
   'image/jpg': 'jpg',
   'image/jpeg': 'jpg',
-  'image/png': 'png'
+  'image/png': 'png',
+  'image/webp': 'webp'
 };
 
-const storage = multer.diskStorage({ // la méthode diskStorage()  configure le chemin et le nom de fichier pour les fichiers entrants
-  destination: (req, file, callback) => { // on définit la fonction pour indiquer à multer où enregistrer les fichiers entrants
+const storage = multer.diskStorage({ // détermine où sauvegarder les img téléchargés et comment les renommer
+  destination: (req, file, callback) => { 
     callback(null, 'images');
   },
   filename: (req, file, callback) => {
