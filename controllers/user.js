@@ -1,8 +1,7 @@
 const bcrypt = require('bcrypt'); // bibliothèque bcrypt pour le cryptage du mdp
 const jwt = require('jsonwebtoken'); // bibliothèque pour générer des jetons d'auth
-
 const User = require('../models/user');
-require('dotenv').config(); // bibliothèque pour charger les variables d'environnement (identifiants de mongoDB)
+require('dotenv').config(); // bibliothèque pour charger les variables d'environnement (identifiants de mongoDB et token secret)
 
 // enregistrement d'un utilisateur
 exports.signup = (req, res, next) => {
@@ -21,7 +20,8 @@ exports.signup = (req, res, next) => {
 
 // connexion de l'utilisateur
 exports.login = (req, res, next) => {
-    User.findOne({ email: req.body.email })
+    console.log('Using secret:', process.env.RANDOM_TOKEN_SECRET);
+    User.findOne({ email: req.body.email }) // on recherche l'utilisateur (email) dans la base de données 
         .then(user => {
             if (!user) {
                 return res.status(401).json({ message: 'Paire login/mot de passe incorrecte'});
@@ -31,11 +31,11 @@ exports.login = (req, res, next) => {
                     if (!valid) {
                         return res.status(401).json({ message: 'Paire login/mot de passe incorrecte' });
                     }
-                    res.status(200).json({ // si les mdp concordent, alors on renvoie un objet json avec l'id et le token
+                    res.status(200).json({ // si les mdp concordent, alors on renvoie un objet json avec l'id et un token
                         userId: user._id,
                         token: jwt.sign(
                             { userId: user._id },
-                            'RANDOM_TOKEN_SECRET',
+                            process.env.RANDOM_TOKEN_SECRET, // on utilise la clé secrète pour signer le token
                             { expiresIn:'24h' }
                         )
                     });
