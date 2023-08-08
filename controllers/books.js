@@ -23,12 +23,12 @@ exports.getOneBook = (req, res) => {
     Book.findOne({ _id: req.params.id })
         .then(book => res.status(200).json(book))
         .catch(error => res.status(404).json({ error }));
-}
+};
 
 // modifier un livre
 exports.modifyBook = (req, res) => {
-  // on stocke les données à mettre à  jour pour le livre existant :
 
+  // on stocke les données à mettre à  jour pour le livre existant :
     const bookObject = req.file ? { // si un fichier est présent dans la requête alors...
         ...JSON.parse(req.body.book), // ...on récupère les données à partir du corps de la requête et on étend ces données...
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}` //...avec cette propriété
@@ -103,7 +103,7 @@ exports.rateBook = (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Une erreur s\'est produite.' });
       });
-  };
+};
 
 // tri des 3 meilleurs livres
 exports.getBestBooks = (req, res, next) => {
@@ -116,7 +116,7 @@ exports.getBestBooks = (req, res, next) => {
       .catch((error) => {
         res.status(500).json({ error });
       });
-  };
+};
 
 // suppression d'un livre
 exports.deleteBook = (req, res) => {
@@ -143,4 +143,4 @@ exports.getAllBooks = (req, res, next) => {
     Book.find()
         .then(books => res.status(200).json(books))
         .catch(error => res.status(404).json({ error }));
-}
+};
