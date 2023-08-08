@@ -16,7 +16,7 @@ const storage = multer.diskStorage({ // configuration du stockage des img télé
   destination: (req, file, callback) => {
     callback(null, 'images/imagesTransition'); // répertoire de destination pour les img téléchargées
   },
-  filename: (req, file, callback) => {
+  filename: (req, file, callback) => { // configure le nom de l'img
     const name = file.originalname.split(' ').join('_'); // on génère le nom de fichier en remplaçant les espaces par des _
     const extension = MIME_TYPES[file.mimetype]; // extension à partir du type MIME 
     callback(null, name + Date.now() + '.' + extension);
@@ -28,9 +28,7 @@ const upload = multer({ // utilisation de multer pour la gestion des fichiers
   limits: { fileSize: 200 * 1024 }, // limite de taille des fichiers (200 Ko)
 }).single('image');
 
-// Middleware pour optimiser l'image avec Sharp avant de l'enregistrer :
-
-const optimizeImage = (req, res, next) => {
+const optimizeImage = (req, res, next) => { // Middleware pour optimiser l'image avec Sharp avant de l'enregistrer
   if (!req.file) {
     return next();
   }
